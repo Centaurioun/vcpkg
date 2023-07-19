@@ -5,9 +5,11 @@ import sys
 
 keyword = "/include/"
 
+
 def getFiles(path):
     files = os.listdir(path)
     return list(filter(lambda x: x[0] != '.', files))
+
 
 def gen_all_file_strings(path, files, headers, output):
     for file in files:
@@ -22,6 +24,7 @@ def gen_all_file_strings(path, files, headers, output):
             if filepath.startswith(keyword):
                 headers.write(package + ":" + filepath[len(keyword):])
         f.close()
+
 
 def main(path):
     try:
@@ -38,6 +41,6 @@ def main(path):
     except e:
         print("Failed to generate file lists")
 
+
 if __name__ == "__main__":
     main(sys.argv[1])
-

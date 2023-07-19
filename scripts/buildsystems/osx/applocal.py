@@ -56,9 +56,11 @@ class GlobalConfig(object):
 
 def run_and_get_output(popen_args):
     """Run process and get all output"""
-    process_output = namedtuple('ProcessOutput', ['stdout', 'stderr', 'retcode'])
+    process_output = namedtuple(
+        'ProcessOutput', ['stdout', 'stderr', 'retcode'])
     try:
-        GlobalConfig.logger.debug('run_and_get_output({0})'.format(repr(popen_args)))
+        GlobalConfig.logger.debug(
+            'run_and_get_output({0})'.format(repr(popen_args)))
 
         proc = Popen(popen_args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
         stdout, stderr = proc.communicate(b'')
@@ -84,7 +86,8 @@ def get_dependencies(filename):
     deps = []
     if proc_out.retcode == 0:
         # some string splitting
-        deps = [s.strip().split(b' ')[0].decode('utf-8') for s in proc_out.stdout.splitlines()[1:] if s]
+        deps = [s.strip().split(b' ')[0].decode('utf-8')
+                for s in proc_out.stdout.splitlines()[1:] if s]
         # prevent infinite recursion when a binary depends on itself (seen with QtWidgets)...
         deps = [s for s in deps if os.path.basename(filename) not in s]
     return deps
@@ -133,7 +136,8 @@ def normalize_qtplugin_name(filename):
     qtplugin_name_rgx = re.compile(QTPLUGIN_NAME_REGEX)
     rgxret = qtplugin_name_rgx.match(filename)
     if not rgxret:
-        msg = 'couldn\'t normalize a non-qt plugin filename: {0}'.format(filename)
+        msg = 'couldn\'t normalize a non-qt plugin filename: {0}'.format(
+            filename)
         GlobalConfig.logger.critical(msg)
         raise Exception(msg)
 
@@ -156,7 +160,8 @@ def normalize_qtplugin_name(filename):
         plugintype=qtplugintype,
         pluginname=qtpluginname)
 
-    GlobalConfig.logger.debug('\treturns({0})'.format((qtpluginname, abspath, rpath)))
+    GlobalConfig.logger.debug(
+        '\treturns({0})'.format((qtpluginname, abspath, rpath)))
     return qtpluginname, abspath, rpath
 
 
@@ -213,12 +218,14 @@ def normalize_loaderpath_name(filename):
             - abspath is the absolute path of the qt lib inside the app bundle of exepath
             - relpath is the correct rpath to a qt lib inside the app bundle
     """
-    GlobalConfig.logger.debug('normalize_loaderpath_name({0})'.format(filename))
+    GlobalConfig.logger.debug(
+        'normalize_loaderpath_name({0})'.format(filename))
 
     loaderpath_name_rgx = re.compile(LOADERPATH_REGEX)
     rgxret = loaderpath_name_rgx.match(filename)
     if not rgxret:
-        msg = 'couldn\'t normalize a loaderpath lib filename: {0}'.format(filename)
+        msg = 'couldn\'t normalize a loaderpath lib filename: {0}'.format(
+            filename)
         GlobalConfig.logger.critical(msg)
         raise Exception(msg)
 
@@ -237,7 +244,8 @@ def normalize_loaderpath_name(filename):
         prefix='@executable_path/..',
         loaderpathlib=loaderpathlib)
 
-    GlobalConfig.logger.debug('\treturns({0})'.format((loaderpathlib, abspath, rpath)))
+    GlobalConfig.logger.debug('\treturns({0})'.format(
+        (loaderpathlib, abspath, rpath)))
     return loaderpathlib, abspath, rpath
 
 
@@ -269,7 +277,8 @@ def fix_dependency(binary, dep):
     # (ie: relative to exepath using '@executable_path' syntax)
     if dep != dep_rpath:
         # dep rpath is not ok
-        GlobalConfig.logger.info('changing rpath \'{0}\' in binary {1}'.format(dep, binary))
+        GlobalConfig.logger.info(
+            'changing rpath \'{0}\' in binary {1}'.format(dep, binary))
 
         # call install_name_tool -change on binary
         popen_args = ['install_name_tool', '-change', dep, dep_rpath, binary]
@@ -307,14 +316,16 @@ def fix_dependency(binary, dep):
                 dep_ok = False
             else:
                 # ensure permissions are correct if we ever have to change its rpath
-                GlobalConfig.logger.info('ensuring 755 perm to {0}'.format(dep_abspath))
+                GlobalConfig.logger.info(
+                    'ensuring 755 perm to {0}'.format(dep_abspath))
                 popen_args = ['chmod', '755', dep_abspath]
                 proc_out = run_and_get_output(popen_args)
                 if proc_out.retcode != 0:
                     GlobalConfig.logger.info(proc_out.stderr)
                     dep_ok = False
     else:
-        GlobalConfig.logger.debug('{0} is at correct location in bundle'.format(qtname))
+        GlobalConfig.logger.debug(
+            '{0} is at correct location in bundle'.format(qtname))
 
     if dep_ok:
         return fix_binary(dep_abspath)
@@ -336,7 +347,8 @@ def fix_binary(binary):
     # loop on 'binary' dependencies
     for dep in get_dependencies(binary):
         if not fix_dependency(binary, dep):
-            GlobalConfig.logger.error('quitting early: couldn\'t fix dependency {0} of {1}'.format(dep, binary))
+            GlobalConfig.logger.error(
+                'quitting early: couldn\'t fix dependency {0} of {1}'.format(dep, binary))
             return False
     return True
 
@@ -346,10 +358,12 @@ def fix_main_binaries():
         list the main binaries of the app bundle and fix them
     """
     # deduce bundle path
-    bundlepath = os.path.sep.join(GlobalConfig.exepath.split(os.path.sep)[0:-3])
+    bundlepath = os.path.sep.join(
+        GlobalConfig.exepath.split(os.path.sep)[0:-3])
 
     # fix main binary
-    GlobalConfig.logger.info('fixing executable \'{0}\''.format(GlobalConfig.exepath))
+    GlobalConfig.logger.info(
+        'fixing executable \'{0}\''.format(GlobalConfig.exepath))
     if fix_binary(GlobalConfig.exepath):
         GlobalConfig.logger.info('fixing plugins')
         for root, dummy, files in os.walk(bundlepath):
@@ -410,7 +424,8 @@ def main():
     if args.no_log_file and args.quiet:
         GlobalConfig.logger.addHandler(logging.NullHandler())
     else:
-        GlobalConfig.logger.setLevel(logging.DEBUG if args.verbose else logging.INFO)
+        GlobalConfig.logger.setLevel(
+            logging.DEBUG if args.verbose else logging.INFO)
 
     if fix_main_binaries():
         GlobalConfig.logger.info('macdeployqtfix terminated with success')

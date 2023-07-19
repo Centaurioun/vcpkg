@@ -1,9 +1,9 @@
-#include <ucontext.h>
 #include <cstddef>
+#include <ucontext.h>
 
 int main() {
-    ucontext_t context;
-    getcontext(&context);
+  ucontext_t context;
+  getcontext(&context);
 
-    return 0;
+  return 0;
 }

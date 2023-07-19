@@ -20,7 +20,8 @@ with open(f"tensorflow{lib_suffix}.dll-2.params", "r") as f_in:
                 # we need to split the library if it is >4GB, because it's not supported even on x64 Windows
                 f_out.close()
                 file_no += 1
-                f_out = open(f"tensorflow{lib_suffix}.lib-2.params-part{file_no}", "w")
+                f_out = open(
+                    f"tensorflow{lib_suffix}.lib-2.params-part{file_no}", "w")
                 acc_size = 0
                 f_out.write(lib_name.replace(".dll", f"-part{file_no}.lib"))
             acc_size += size
